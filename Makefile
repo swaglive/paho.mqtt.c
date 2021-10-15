@@ -21,7 +21,7 @@
 # Note: on OS X you should install XCode and the associated command-line tools
 
 SHELL = /bin/sh
-.PHONY: clean, mkdir, install, uninstall, html
+.PHONY: clean, mkdir, install, uninstall, html, copy-headers, test
 
 MAJOR_VERSION := $(shell cat version.major)
 MINOR_VERSION := $(shell cat version.minor)
@@ -82,6 +82,8 @@ mandir = $(datarootdir)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
+libinclude_c_dir = $(blddir)/include_c/include
+libinclude_a_dir = $(blddir)/include_a/include
 
 SOURCE_FILES = $(wildcard $(srcdir)/*.c)
 SOURCE_FILES_C = $(filter-out $(srcdir)/MQTTAsync.c $(srcdir)/MQTTAsyncUtils.c $(srcdir)/MQTTVersion.c $(srcdir)/SSLSocket.c, $(SOURCE_FILES))
@@ -143,6 +145,8 @@ PAHO_C_PUB_NAME = paho_c_pub
 PAHO_C_SUB_NAME = paho_c_sub
 PAHO_CS_PUB_NAME = paho_cs_pub
 PAHO_CS_SUB_NAME = paho_cs_sub
+HEADERS_C_NAME = $(notdir $(wildcard $(HEADERS_C)))
+HEADERS_A_NAME =  $(notdir $(wildcard $(HEADERS_A)))
 
 MQTTLIB_C_TARGET = ${blddir}/${MQTTLIB_C_NAME}
 MQTTLIB_CS_TARGET = ${blddir}/${MQTTLIB_CS_NAME}
@@ -153,6 +157,8 @@ PAHO_C_PUB_TARGET = ${blddir}/samples/${PAHO_C_PUB_NAME}
 PAHO_C_SUB_TARGET = ${blddir}/samples/${PAHO_C_SUB_NAME}
 PAHO_CS_PUB_TARGET = ${blddir}/samples/${PAHO_CS_PUB_NAME}
 PAHO_CS_SUB_TARGET = ${blddir}/samples/${PAHO_CS_SUB_NAME}
+HEADERS_C_TARGET = $(addprefix $(libinclude_c_dir)/,$(HEADERS_C_NAME))
+HEADERS_A_TARGET = $(addprefix $(libinclude_a_dir)/,$(HEADERS_A_NAME))
 
 #CCFLAGS_SO = -g -fPIC $(CFLAGS) -Os -Wall -fvisibility=hidden -I$(blddir_work) 
 #FLAGS_EXE = $(LDFLAGS) -I ${srcdir} -lpthread -L ${blddir}
@@ -209,9 +215,12 @@ LDCONFIG = echo
 
 endif
 
+test:
+	-echo $(HEADERS_C_NAME)
+
 all: build
 
-build: | mkdir ${MQTTLIB_C_TARGET} ${MQTTLIB_CS_TARGET} ${MQTTLIB_A_TARGET} ${MQTTLIB_AS_TARGET} ${MQTTVERSION_TARGET} ${SYNC_SAMPLES} ${SYNC_UTILS} ${ASYNC_SAMPLES} ${ASYNC_UTILS} ${SYNC_TESTS} ${SYNC_SSL_TESTS} ${ASYNC_TESTS} ${ASYNC_SSL_TESTS}
+build: | mkdir ${MQTTLIB_C_TARGET} ${MQTTLIB_CS_TARGET} ${MQTTLIB_A_TARGET} ${MQTTLIB_AS_TARGET} ${MQTTVERSION_TARGET} ${SYNC_SAMPLES} ${SYNC_UTILS} ${ASYNC_SAMPLES} ${ASYNC_UTILS} ${SYNC_TESTS} ${SYNC_SSL_TESTS} ${ASYNC_TESTS} ${ASYNC_SSL_TESTS} ${HEADERS_C_TARGET} ${HEADERS_A_TARGET}
 
 clean:
 	rm -rf ${blddir}/*
@@ -220,6 +229,8 @@ clean:
 mkdir:
 	-mkdir -p ${blddir}/samples
 	-mkdir -p ${blddir}/test
+	-mkdir -p ${libinclude_a_dir}
+	-mkdir -p ${libinclude_c_dir}
 	echo OSTYPE is $(OSTYPE)
 
 ${SYNC_TESTS}: ${blddir}/test/%: ${srcdir}/../test/%.c $(MQTTLIB_C_TARGET)
@@ -371,3 +382,11 @@ html:
 	$(call process_doxygen,DoxyfileV3ClientAPI)
 	$(call process_doxygen,DoxyfileV3AsyncAPI)
 	$(call process_doxygen,DoxyfileV3ClientInternal)
+
+$(HEADERS_A_TARGET): $(libinclude_a_dir)/%.h: $(srcdir)/%.h
+	echo $(HEADERS_A_TARGET)
+	-cp $? $@
+
+$(HEADERS_C_TARGET): $(libinclude_c_dir)/%.h: $(srcdir)/%.h
+	echo $(HEADERS_C_TARGET)
+	-cp $? $@

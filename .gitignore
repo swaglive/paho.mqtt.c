@@ -4,3 +4,4 @@
 *.swp
 *.pyc
 /build.paho
+.DS_Store
