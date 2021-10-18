@@ -5,3 +5,5 @@
 *.pyc
 /build.paho
 .DS_Store
+obj/
+libs/
