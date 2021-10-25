@@ -42,9 +42,9 @@ exit:
   return rc;
 }
 
-int MQTTHelper_subscribe(void *context, const char *topics, MQTTQoS qos)
+int MQTTHelper_subscribe(void *context, const char *topic, MQTTQoS qos)
 {
-  return MQTTHelper_subscribeMany(context, (char *const *)&topics, 1, qos);
+  return MQTTHelper_subscribeMany(context, (char *const *)&topic, 1, qos);
 }
 
 int waitForSubscriptionResult()

@@ -29,6 +29,11 @@ void _freeLastMessage(void);
 void _freeConnMessage(void);
 void processMessages(MessageCallback msgCb);
 
+int MQTTHelper_dummy()
+{
+  return 0;
+}
+
 int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
 {
   printf("Broker: %s, Client: %s \n", brokerUri, clientId);

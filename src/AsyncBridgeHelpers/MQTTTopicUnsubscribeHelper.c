@@ -22,8 +22,8 @@ int MQTTHelper_unsubscribeMany(void *context, char *const *topics, int count)
 
   int rc;
 
-  opts.onSuccess = onSubscribe;
-  opts.onFailure = onSubscribeFailure;
+  opts.onSuccess = onUnsubscribe;
+  opts.onFailure = onUnsubscribeFailure;
   opts.context = client;
 
   if ((rc = MQTTAsync_unsubscribeMany(client, count, topics, &opts)) != MQTTASYNC_SUCCESS)
@@ -36,7 +36,7 @@ int MQTTHelper_unsubscribeMany(void *context, char *const *topics, int count)
   pthread_mutex_init(&unsub_mutex, NULL);
   pthread_cond_init(&unsub_cv, NULL);
 
-  rc = waitForSubscriptionResult();
+  rc = waitForUnsubscriptionResult();
 
   destroyFailureData((void **)&unsub_failure);
   pthread_mutex_destroy(&unsub_mutex);
@@ -45,8 +45,8 @@ exit:
   return rc;
 }
 
-int MQTTHelper_unsubscribe(void *context, const char *topics, int count) {
-  return MQTTHelper_unsubscribeMany(context, (char *const *)&topics, 1);
+int MQTTHelper_unsubscribe(void *context, const char *topic) {
+  return MQTTHelper_unsubscribeMany(context, (char *const *)&topic, 1);
 }
 
 int waitForUnsubscriptionResult(void) {
