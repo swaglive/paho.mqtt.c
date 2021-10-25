@@ -17,7 +17,7 @@ int MQTTHelper_disconnect(void *context)
   MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
   opts.onSuccess = onDisconnect;
   opts.onFailure = onDisconnectFailure;
-  return MQTTAsync_disconnect(client, &opts));
+  return MQTTAsync_disconnect(client, &opts);
 }
 
 void onDisconnect(void *context, MQTTAsync_successData *response) {

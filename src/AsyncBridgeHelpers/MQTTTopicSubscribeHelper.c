@@ -15,7 +15,7 @@ void onSubscribe(void *context, MQTTAsync_successData *response);
 void onSubscribeFailure(void *context, MQTTAsync_failureData *response);
 int waitForSubscriptionResult(void);
 
-int MQTTHelper_subscribeMany(void *client, char *const *topics, int count, MQTTQoS qos)
+int MQTTHelper_subscribeMany(void *context, char *const *topics, int count, const MQTTQoS qos)
 {
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
@@ -24,7 +24,7 @@ int MQTTHelper_subscribeMany(void *client, char *const *topics, int count, MQTTQ
   opts.onSuccess = onSubscribe;
   opts.onFailure = onSubscribeFailure;
   opts.context = client;
-  if ((rc = MQTTAsync_subscribeMany(client, count, topics, &qos, &opts)) != MQTTASYNC_SUCCESS)
+  if ((rc = MQTTAsync_subscribeMany(client, count, topics, (const int *)&qos, &opts)) != MQTTASYNC_SUCCESS)
   {
     printf("Failed to start subscribe, return code %d\n", rc);
     goto exit;
@@ -40,6 +40,11 @@ int MQTTHelper_subscribeMany(void *client, char *const *topics, int count, MQTTQ
   pthread_cond_destroy(&sub_cv);
 exit:
   return rc;
+}
+
+int MQTTHelper_subscribe(void *context, const char *topics, MQTTQoS qos)
+{
+  return MQTTHelper_subscribeMany(context, (char *const *)&topics, 1, qos);
 }
 
 int waitForSubscriptionResult()

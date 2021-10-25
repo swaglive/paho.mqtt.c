@@ -45,6 +45,10 @@ exit:
   return rc;
 }
 
+int MQTTHelper_unsubscribe(void *context, const char *topics, int count) {
+  return MQTTHelper_unsubscribeMany(context, (char *const *)&topics, 1);
+}
+
 int waitForUnsubscriptionResult(void) {
   int rc = 0;
   pthread_mutex_lock(&unsub_mutex);

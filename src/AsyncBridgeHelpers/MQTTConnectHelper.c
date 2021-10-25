@@ -64,7 +64,7 @@ int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallb
 
 msg_q_destroy_exit:
   _freeLastMessage();
-  destroyFailureData(&conn_failure);
+  destroyFailureData((void **)&conn_failure);
   pthread_mutex_destroy(&msg_q_mutex);
   pthread_cond_destroy(&nonempty_msg_q_cv);
 client_destroy_exit:
@@ -107,7 +107,7 @@ void waitingForConnection(MQTTAsync client, ConnectionCallback connCb)
     if (conn_failure)
     {
       (*connCb)(NULL, conn_failure->code, (char *)conn_failure->message);
-      destroyFailureData(&conn_failure);
+      destroyFailureData((void **)&conn_failure);
     }
     else
     {
@@ -143,7 +143,7 @@ void onConnectFailure(void *context, MQTTAsync_failureData *response)
 {
   MQTTAsync_failureData *copy = copyFailureData(response);
   pthread_mutex_lock(&msg_q_mutex);
-  destroyFailureData(&conn_failure);
+  destroyFailureData((void **)&conn_failure);
   conn_failure = copy;
   conn_status = idle;
   pthread_cond_signal(&nonempty_msg_q_cv);
