@@ -1,10 +1,12 @@
 LOCAL_PATH := $(call my-dir)
 APP_ALLOW_MISSING_DEPS = true
+build_path := ../build
 libpaho-mqtt3_lib_path := ../src
 libpaho-mqtt3_c_includes := $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path) \
 	external/hdc/android-ifaddrs \
 	external/openssl/include \
-	external/zlib
+	external/zlib \
+	$(LOCAL_PATH)/$(build_path) \
 
 MAJOR_VERSION := $(shell cat $(LOCAL_PATH)/../version.major)
 MINOR_VERSION := $(shell cat $(LOCAL_PATH)/../version.minor)
@@ -48,6 +50,7 @@ libpaho-mqtt3_local_src_c_files_cs := \
 libpaho-mqtt3_local_src_c_files_a := \
 	$(libpaho-mqtt3_lib_path)/MQTTAsync.c \
 	$(libpaho-mqtt3_lib_path)/MQTTAsyncUtils.c \
+	$(libpaho-mqtt3_lib_path)/MQTTTest.c \
 
 libpaho-mqtt3_local_src_c_files_as := \
 	$(libpaho-mqtt3_lib_path)/MQTTAsync.c \
@@ -58,12 +61,12 @@ SED_COMMAND = sed \
     -e "s/@CLIENT_VERSION@/${VERSION}/g" \
     -e "s/@BUILD_TIMESTAMP@/${shell date}/g"
 
-$(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)/VersionInfo.h: $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)/VersionInfo.h.in
+$(LOCAL_PATH)/$(build_path)/VersionInfo.h: $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)/VersionInfo.h.in
 	$(SED_COMMAND) $< > $@
 
 
 include $(CLEAR_VARS)
-.PHONY: $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)/VersionInfo.h
+.PHONY: $(LOCAL_PATH)/$(build_path)/VersionInfo.h
 LOCAL_MODULE    := libpaho-mqtt3c
 LOCAL_SHARED_LIBRARIES := libdl
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)
@@ -81,7 +84,7 @@ include $(BUILD_SHARED_LIBRARY)
 # include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-.PHONY: $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)/VersionInfo.h
+.PHONY: $(LOCAL_PATH)/$(build_path)/VersionInfo.h
 LOCAL_MODULE    := libpaho-mqtt3a
 LOCAL_SHARED_LIBRARIES := libdl
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/${libpaho-mqtt3_lib_path}

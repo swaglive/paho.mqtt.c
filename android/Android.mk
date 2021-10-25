@@ -45,7 +45,7 @@ libpaho-mqtt3_local_src_c_files_common := \
 	$(libpaho-mqtt3_lib_path)/MQTTVersion.c \
 	$(libpaho-mqtt3_lib_path)/OsWrapper.c \
 	$(libpaho-mqtt3_lib_path)/SHA1.c \
-	$(libpaho-mqtt3_lib_path)/WebSocket.c \
+	$(libpaho-mqtt3_lib_path)/WebSocket.c \	
 
 libpaho-mqtt3_local_src_c_files_c := \
 	$(libpaho-mqtt3_lib_path)/MQTTClient.c \
@@ -56,7 +56,7 @@ libpaho-mqtt3_local_src_c_files_cs := \
 
 libpaho-mqtt3_local_src_c_files_a := \
 	$(libpaho-mqtt3_lib_path)/MQTTAsync.c \
-	$(libpaho-mqtt3_lib_path)/MQTTAsyncUtils.c \
+	$(libpaho-mqtt3_lib_path)/MQTTAsyncUtils.c \	
 
 libpaho-mqtt3_local_src_c_files_as := \
 	$(libpaho-mqtt3_lib_path)/MQTTAsync.c \
