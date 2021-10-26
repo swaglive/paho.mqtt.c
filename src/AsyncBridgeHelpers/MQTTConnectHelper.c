@@ -29,13 +29,12 @@ void _freeLastMessage(void);
 void _freeConnMessage(void);
 void processMessages(MessageCallback msgCb);
 
-int MQTTHelper_dummy()
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
 {
-  return 0;
-}
-
-int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
-{
+  if (!brokerUri || !clientId)
+  {
+    return -1;
+  }
   printf("Broker: %s, Client: %s \n", brokerUri, clientId);
   MQTTAsync client;
   MQTTAsync_connectOptions opts = MQTTAsync_connectOptions_initializer;
@@ -103,6 +102,7 @@ void waitingForConnection(MQTTAsync client, ConnectionCallback connCb)
   {
     pthread_cond_wait(&nonempty_msg_q_cv, &msg_q_mutex);
   }
+  printf("[MQTT] update connection status %d\n", conn_status);
   if (conn_status == connected)
   {
     (*connCb)(client, 0, NULL);

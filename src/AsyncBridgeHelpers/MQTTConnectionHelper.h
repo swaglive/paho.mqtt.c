@@ -9,4 +9,3 @@ typedef enum
 
 int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb);
 int MQTTHelper_disconnect(void *context);
-int MQTTHelper_dummy(void);

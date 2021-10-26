@@ -11,8 +11,12 @@ extern pthread_cond_t nonempty_msg_q_cv;
 void onDisconnectFailure(void *context, MQTTAsync_failureData *response);
 void onDisconnect(void *context, MQTTAsync_successData *response);
 
-int MQTTHelper_disconnect(void *context)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_disconnect(void *context)
 {
+  if (!context)
+  {
+    return -1;
+  }
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
   opts.onSuccess = onDisconnect;
@@ -20,7 +24,8 @@ int MQTTHelper_disconnect(void *context)
   return MQTTAsync_disconnect(client, &opts);
 }
 
-void onDisconnect(void *context, MQTTAsync_successData *response) {
+void onDisconnect(void *context, MQTTAsync_successData *response)
+{
   printf("Successful disconnection\n");
   pthread_mutex_lock(&msg_q_mutex);
   conn_status = idle;
@@ -28,7 +33,8 @@ void onDisconnect(void *context, MQTTAsync_successData *response) {
   pthread_mutex_unlock(&msg_q_mutex);
 }
 
-void onDisconnectFailure(void *context, MQTTAsync_failureData *response) {
+void onDisconnectFailure(void *context, MQTTAsync_failureData *response)
+{
   printf("Disconnect failed, rc %d\n", response->code);
   pthread_mutex_lock(&msg_q_mutex);
   conn_status = idle;

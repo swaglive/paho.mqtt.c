@@ -2,6 +2,7 @@ LOCAL_PATH := $(call my-dir)
 APP_ALLOW_MISSING_DEPS = true
 build_path := ../build
 libpaho-mqtt3_lib_path := ../src
+libpaho-mqtt-helper_lib_path := $(libpaho-mqtt3_lib_path)/asyncBridgeHelpers
 libpaho-mqtt3_c_includes := $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path) \
 	external/hdc/android-ifaddrs \
 	external/openssl/include \
@@ -49,13 +50,19 @@ libpaho-mqtt3_local_src_c_files_cs := \
 
 libpaho-mqtt3_local_src_c_files_a := \
 	$(libpaho-mqtt3_lib_path)/MQTTAsync.c \
-	$(libpaho-mqtt3_lib_path)/MQTTAsyncUtils.c \
-	$(libpaho-mqtt3_lib_path)/MQTTTest.c \
+	$(libpaho-mqtt3_lib_path)/MQTTAsyncUtils.c \	
 
 libpaho-mqtt3_local_src_c_files_as := \
 	$(libpaho-mqtt3_lib_path)/MQTTAsync.c \
 	$(libpaho-mqtt3_lib_path)/MQTTAsyncUtils.c \
 	$(libpaho-mqtt3_lib_path)/SSLSocket.c \
+
+libpaho-mqtt-helper_local_src_files := \
+	$(libpaho-mqtt-helper_lib_path)/HelperUtils.c \
+	$(libpaho-mqtt-helper_lib_path)/MQTTConnectHelper.c \
+	$(libpaho-mqtt-helper_lib_path)/MQTTDisconnectHelper.c \
+	$(libpaho-mqtt-helper_lib_path)/MQTTTopicSubscribeHelper.c \
+	$(libpaho-mqtt-helper_lib_path)/MQTTTopicUnsubscribeHelper.c \
 
 SED_COMMAND = sed \
     -e "s/@CLIENT_VERSION@/${VERSION}/g" \
@@ -100,3 +107,12 @@ include $(BUILD_SHARED_LIBRARY)
 # LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
 # LOCAL_SRC_FILES := $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_as)
 # include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+.PHONY: $(LOCAL_PATH)/$(build_path)/VersionInfo.h
+LOCAL_MODULE    := libpaho-mqtt-helper
+LOCAL_SHARED_LIBRARIES := libdl
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/$(libpaho-mqtt-helper_lib_path)
+LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
+LOCAL_SRC_FILES := $(libpaho-mqtt-helper_local_src_files) $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_a)
+include $(BUILD_SHARED_LIBRARY)

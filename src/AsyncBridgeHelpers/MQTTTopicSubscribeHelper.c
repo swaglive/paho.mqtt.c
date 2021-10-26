@@ -15,8 +15,12 @@ void onSubscribe(void *context, MQTTAsync_successData *response);
 void onSubscribeFailure(void *context, MQTTAsync_failureData *response);
 int waitForSubscriptionResult(void);
 
-int MQTTHelper_subscribeMany(void *context, char *const *topics, int count, const MQTTQoS qos)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subscribeMany(void *context, char *const *topics, int count, const MQTTQoS qos)
 {
+  if (!context)
+  {
+    return -1;
+  }
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   int rc;
@@ -42,8 +46,9 @@ exit:
   return rc;
 }
 
-int MQTTHelper_subscribe(void *context, const char *topic, MQTTQoS qos)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subscribe(void *context, const char *topic, MQTTQoS qos)
 {
+  printf("Will subscribe to %s\n", topic);
   return MQTTHelper_subscribeMany(context, (char *const *)&topic, 1, qos);
 }
 
