@@ -23,11 +23,11 @@ int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *m
 void onConnect(void *context, MQTTAsync_successData *response);
 void onConnectFailure(void *context, MQTTAsync_failureData *response);
 void onConnectionLost(void *context, char *cause);
-void waitingForMessages(MessageCallback msgCb);
+void waitingForMessages(void *context, MessageCallback msgCb);
 void waitingForConnection(MQTTAsync client, ConnectionCallback connCb);
 void _freeLastMessage(void);
 void _freeConnMessage(void);
-void processMessages(MessageCallback msgCb);
+void processMessages(void *context, MessageCallback msgCb);
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
 {
@@ -64,7 +64,7 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   }
   conn_status = connecting;
   waitingForConnection(client, connCb);
-  waitingForMessages(msgCb);
+  waitingForMessages(client, msgCb);
 
 msg_q_destroy_exit:
   _freeLastMessage();
@@ -155,18 +155,18 @@ void onConnectFailure(void *context, MQTTAsync_failureData *response)
   pthread_mutex_unlock(&msg_q_mutex);
 }
 
-void waitingForMessages(MessageCallback msgCb)
+void waitingForMessages(void *context, MessageCallback msgCb)
 {
   pthread_mutex_lock(&msg_q_mutex);
   while (conn_status == connected)
   {
     pthread_cond_wait(&nonempty_msg_q_cv, &msg_q_mutex);
-    processMessages(msgCb);
+    processMessages(context, msgCb);
   }
   pthread_mutex_unlock(&msg_q_mutex);
 }
 
-void processMessages(MessageCallback msgCb)
+void processMessages(void *context, MessageCallback msgCb)
 {
   if (!last_message)
   {
@@ -176,7 +176,7 @@ void processMessages(MessageCallback msgCb)
   char *topic = last_message->topic;
   void *payload = msgPtr->payload;
   int payloadlen = msgPtr->payloadlen;
-  (*msgCb)(topic, payload, payloadlen);
+  (*msgCb)(context, topic, payload, payloadlen);
   _freeLastMessage();
 }
 

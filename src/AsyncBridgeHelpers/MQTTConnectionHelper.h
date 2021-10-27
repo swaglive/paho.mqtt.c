@@ -1,5 +1,5 @@
 typedef void (*ConnectionCallback)(void *client, int code, const char *messages);
-typedef void (*MessageCallback)(const char *topic, const void *payload, int payloadlen);
+typedef void (*MessageCallback)(void *client, const char *topic, const void *payload, int payloadlen);
 typedef enum
 {
   idle = 0,
