@@ -35,7 +35,7 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   {
     return -1;
   }
-  printf("Broker: %s, Client: %s \n", brokerUri, clientId);
+  printf("[MQTT] Broker: %s, Client: %s \n", brokerUri, clientId);
   MQTTAsync client;
   MQTTAsync_connectOptions opts = MQTTAsync_connectOptions_initializer;
   int rc;

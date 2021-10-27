@@ -15,7 +15,7 @@ void onSubscribe(void *context, MQTTAsync_successData *response);
 void onSubscribeFailure(void *context, MQTTAsync_failureData *response);
 int waitForSubscriptionResult(void);
 
-__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subscribeMany(void *context, char *const *topics, int count, const MQTTQoS *qoslist)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subscribeMany(void *context, int count, char *const *topics, const MQTTQoS *qoslist)
 {
   for (int i = 0; i < count; i++)
   {

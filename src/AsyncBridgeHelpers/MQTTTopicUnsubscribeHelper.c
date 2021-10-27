@@ -15,7 +15,7 @@ void onUnsubscribe(void *context, MQTTAsync_successData *response);
 void onUnsubscribeFailure(void *context, MQTTAsync_failureData *response);
 int waitForUnsubscriptionResult(void);
 
-__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_unsubscribeMany(void *context, char *const *topics, int count)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_unsubscribeMany(void *context, int count, char *const *topics)
 {
   if (!context)
   {
