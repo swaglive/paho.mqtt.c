@@ -84,6 +84,7 @@ man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
 obj_dir = $(blddir)/objects
+obj_s_dir = $(blddir)/objects_s
 ioslib_a_dir = $(blddir)/ios/async_client
 ioslib_c_dir = $(blddir)/ios/client
 helper_dir = $(blddir)/ios/helper_client
@@ -100,8 +101,10 @@ SOURCE_FILES_AS = $(filter-out $(srcdir)/MQTTClient.c $(srcdir)/MQTTVersion.c, $
 SOURCE_FILES_HELPER = $(wildcard $(src_helper_dir)/*.c)
 
 OBJ_FILES = $(patsubst %.c,$(obj_dir)/%.o, $(SOURCE_FILES_NAMES))
+OBJ_S_FILES = $(patsubst %.c,$(obj_s_dir)/%.o, $(SOURCE_FILES_NAMES))
 OBJ_FILES_C = $(filter-out $(obj_dir)/MQTTAsync.o $(obj_dir)/MQTTAsyncUtils.o $(obj_dir)/MQTTVersion.o $(obj_dir)/SSLSocket.o, $(OBJ_FILES))
 OBJ_FILES_A = $(filter-out $(obj_dir)/MQTTClient.o $(obj_dir)/MQTTVersion.o $(obj_dir)/SSLSocket.o, $(OBJ_FILES))
+OBJ_FILES_AS = $(filter-out $(obj_s_dir)/MQTTClient.o $(obj_s_dir)/MQTTVersion.o, $(OBJ_S_FILES))
 OBJ_FILES_HELPER = $(patsubst $(src_helper_dir)/%.c,$(obj_dir)/%.o, $(SOURCE_FILES_HELPER))
 
 HEADERS = $(srcdir)/*.h
@@ -189,6 +192,7 @@ MQTTLIB_IOS_HELPER_TARGET = ${helper_dir}/${MQTTLIB_IOS_HELPER_NAME}
 #FLAGS_EXES = $(LDFLAGS) -I ${srcdir} ${START_GROUP} -lpthread -lssl -lcrypto ${END_GROUP} -L ${blddir}
 
 CCFLAGS_SO = -g -fPIC $(CFLAGS) -D_GNU_SOURCE -Os -Wall -fvisibility=hidden -I$(blddir_work) -DPAHO_MQTT_EXPORTS=1
+CCFLAGS_IOS_SO = -g -fPIC $(CFLAGS) -D_GNU_SOURCE -Os -Wall -fvisibility=hidden -I$(blddir_work) -DPAHO_MQTT_EXPORTS=1
 FLAGS_EXE = $(LDFLAGS) -I ${srcdir} ${START_GROUP} -lpthread ${GAI_LIB} ${END_GROUP} -L ${blddir}
 FLAGS_EXES = $(LDFLAGS) -I ${srcdir} ${START_GROUP} -lpthread ${GAI_LIB} -lssl -lcrypto ${END_GROUP} -L ${blddir}
 
@@ -231,6 +235,7 @@ GAI_LIB =
 EXTRA_LIB = -ldl
 
 CCFLAGS_SO += -Wno-deprecated-declarations -DOSX -I /usr/local/opt/openssl/include
+CCFLAGS_IOS_SO += -Wno-deprecated-declarations -DOSX -I OpenSSL/iphoneos/include
 LDFLAGS_C += -Wl,-install_name,lib$(MQTTLIB_C).so.${MAJOR_VERSION}
 LDFLAGS_CS += -Wl,-install_name,lib$(MQTTLIB_CS).so.${MAJOR_VERSION} -L /usr/local/opt/openssl/lib
 LDFLAGS_A += -Wl,-install_name,lib${MQTTLIB_A}.so.${MAJOR_VERSION}
@@ -255,12 +260,14 @@ clean:
 	rm -rf ${blddir_work}/*
 
 mkdir:
+	echo $(CCFLAGS_IOS_SO)
 	-mkdir -p ${blddir}/samples
 	-mkdir -p ${blddir}/test
 	-mkdir -p ${libinclude_a_dir}
 	-mkdir -p ${libinclude_c_dir}
 	-mkdir -p ${ioslib_helper_include_dir}
 	-mkdir -p ${obj_dir}
+	-mkdir -p ${obj_s_dir}
 	echo OSTYPE is $(OSTYPE)
 
 ${SYNC_TESTS}: ${blddir}/test/%: ${srcdir}/../test/%.c $(MQTTLIB_C_TARGET)
@@ -317,8 +324,8 @@ ${MQTTLIB_IOS_CS_TARGET}: ${OBJ_FILES_C}
 ${MQTTLIB_IOS_AS_TARGET}: ${OBJ_FILES_A}
 	libtool ${LDFLAGS_IOS_AS} -static -o $@ ${OBJ_FILES_A}
 
-${MQTTLIB_IOS_HELPER_TARGET}: ${OBJ_FILES_HELPER} ${OBJ_FILES_A}
-	libtool ${LDFLAGS_IOS_AS} -static -o $@ ${OBJ_FILES_HELPER} ${OBJ_FILES_A}
+${MQTTLIB_IOS_HELPER_TARGET}: ${OBJ_FILES_HELPER} ${OBJ_FILES_AS}
+	libtool ${LDFLAGS_IOS_AS} -static -o $@ ${OBJ_FILES_HELPER} ${OBJ_FILES_AS}
 
 ${MQTTVERSION_TARGET}: $(srcdir)/MQTTVersion.c $(srcdir)/MQTTAsync.h $(MQTTLIB_A_TARGET)
 	${CC} ${FLAGS_EXE} -o $@ -l${MQTTLIB_A} $(srcdir)/MQTTVersion.c -ldl
@@ -423,11 +430,14 @@ html:
 	$(call process_doxygen,DoxyfileV3ClientInternal)
 
 $(OBJ_FILES): $(obj_dir)/%.o: $(srcdir)/%.c
-	$(IOS_CC) $(IOS_ARCH) $(CCFLAGS_SO) -I $(blddir_work) -c $< -o $@
+	$(IOS_CC) $(IOS_ARCH) $(CCFLAGS_IOS_SO) -I $(blddir_work) -c $< -o $@
+
+$(OBJ_FILES_AS): $(obj_s_dir)/%.o: $(srcdir)/%.c	
+	$(IOS_CC) $(IOS_ARCH) -DOPENSSL $(CCFLAGS_IOS_SO) -I $(blddir_work) -c $< -o $@
 
 $(OBJ_FILES_HELPER): $(obj_dir)/%.o: $(src_helper_dir)/%.c
 	echo compile $@
-	$(IOS_CC) $(IOS_ARCH) $(CCFLAGS_SO) -I $(blddir_work) -I $(srcdir) -c $< -o $@
+	$(IOS_CC) $(IOS_ARCH) $(CCFLAGS_IOS_SO) -I $(blddir_work) -I $(srcdir) -c $< -o $@
 	
 $(HEADERS_A_TARGET): $(libinclude_a_dir)/%.h: $(srcdir)/%.h	
 	-cp $? $@

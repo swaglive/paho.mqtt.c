@@ -1,0 +1,3 @@
+[submodule "OpenSSL"]
+	path = OpenSSL
+	url = git@github.com:krzyzanowskim/OpenSSL.git
