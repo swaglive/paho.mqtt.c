@@ -1,9 +1,9 @@
 #include "MQTTConnectionHelper.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include "Heap.h"
 #include "MQTTAsync.h"
 #include "HelperUtils.h"
 
@@ -31,18 +31,20 @@ void processMessages(void *context, MessageCallback msgCb);
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
 {
+  int rc = 0;
   if (!brokerUri || !clientId)
   {
-    return -1;
+    rc = -1;
+    goto exit;
   }
   printf("[MQTT] Broker: %s, Client: %s \n", brokerUri, clientId);
   MQTTAsync client;
   MQTTAsync_connectOptions opts = MQTTAsync_connectOptions_initializer;
-  int rc;
 
   if ((rc = MQTTAsync_create(&client, brokerUri, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTASYNC_SUCCESS)
   {
     rc = EXIT_FAILURE;
+    goto exit;
   }
   if ((rc = MQTTAsync_setCallbacks(client, client, onConnectionLost, onMessage, NULL)) != MQTTASYNC_SUCCESS)
   {
@@ -175,8 +177,10 @@ void processMessages(void *context, MessageCallback msgCb)
   MQTTAsync_message *msgPtr = last_message->message;
   char *topic = last_message->topic;
   void *payload = msgPtr->payload;
-  int payloadlen = msgPtr->payloadlen;  
-   (*msgCb)(context, topic, payload, payloadlen);
+  int payloadlen = msgPtr->payloadlen;
+  MQTTHelper_UserProperties props = getUserPropertiesFromMessage(msgPtr);
+  (*msgCb)(context, topic, payload, payloadlen, props);
+  freeUserProperties(props);
   _freeLastMessage();
 }
 
