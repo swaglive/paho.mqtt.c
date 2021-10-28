@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <pthread.h>
-#include "../MQTTAsync.h"
+#include "MQTTAsync.h"
 #include "HelperUtils.h"
 
 pthread_mutex_t sub_mutex;

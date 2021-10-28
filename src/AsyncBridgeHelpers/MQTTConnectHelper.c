@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include "../MQTTAsync.h"
+#include "MQTTAsync.h"
 #include "HelperUtils.h"
 
 typedef struct
@@ -175,8 +175,8 @@ void processMessages(void *context, MessageCallback msgCb)
   MQTTAsync_message *msgPtr = last_message->message;
   char *topic = last_message->topic;
   void *payload = msgPtr->payload;
-  int payloadlen = msgPtr->payloadlen;
-  (*msgCb)(context, topic, payload, payloadlen);
+  int payloadlen = msgPtr->payloadlen;  
+   (*msgCb)(context, topic, payload, payloadlen);
   _freeLastMessage();
 }
 

@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 #include <stdio.h>
-#include "../MQTTAsync.h"
+#include "MQTTAsync.h"
 
 extern pthread_mutex_t msg_q_mutex;
 extern ConnectionStatus conn_status;
