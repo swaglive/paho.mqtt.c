@@ -9,10 +9,10 @@ pthread_mutex_t sub_mutex;
 pthread_cond_t sub_cv;
 
 int subscribing = 0;
-MQTTAsync_failureData *sub_failure;
+MQTTAsync_failureData5 *sub_failure;
 
-void onSubscribe(void *context, MQTTAsync_successData *response);
-void onSubscribeFailure(void *context, MQTTAsync_failureData *response);
+void onSubscribe(void *context, MQTTAsync_successData5 *response);
+void onSubscribeFailure(void *context, MQTTAsync_failureData5 *response);
 int waitForSubscriptionResult(void);
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subscribeMany(void *context, int count, char *const *topics, const MQTTQoS *qoslist)
@@ -30,8 +30,8 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subs
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   int rc;
 
-  opts.onSuccess = onSubscribe;
-  opts.onFailure = onSubscribeFailure;
+  opts.onSuccess5 = onSubscribe;
+  opts.onFailure5 = onSubscribeFailure;
   opts.context = client;
   if ((rc = MQTTAsync_subscribeMany(client, count, topics, (const int *)qoslist, &opts)) != MQTTASYNC_SUCCESS)
   {
@@ -73,7 +73,7 @@ int waitForSubscriptionResult()
   return rc;
 }
 
-void onSubscribe(void *context, MQTTAsync_successData *response)
+void onSubscribe(void *context, MQTTAsync_successData5 *response)
 {
   pthread_mutex_lock(&sub_mutex);
   printf("[MQTT] Subscribe succeeded\n");
@@ -82,9 +82,9 @@ void onSubscribe(void *context, MQTTAsync_successData *response)
   pthread_mutex_unlock(&sub_mutex);
 }
 
-void onSubscribeFailure(void *context, MQTTAsync_failureData *response)
+void onSubscribeFailure(void *context, MQTTAsync_failureData5 *response)
 {
-  MQTTAsync_failureData *copy = copyFailureData(response);
+  MQTTAsync_failureData5 *copy = copyFailureData(response);
   pthread_mutex_lock(&sub_mutex);
   printf("[MQTT] Subscribe failed, rc %d\n", response->code);
   sub_failure = copy;

@@ -10,8 +10,8 @@ void *copyFailureData(void *failureData)
   {
     return NULL;
   }
-  MQTTAsync_failureData *data = (MQTTAsync_failureData *)failureData;
-  MQTTAsync_failureData *copyBuf = (MQTTAsync_failureData *)calloc(1, sizeof(MQTTAsync_failureData));
+  MQTTAsync_failureData5 *data = (MQTTAsync_failureData5 *)failureData;
+  MQTTAsync_failureData5 *copyBuf = (MQTTAsync_failureData5 *)calloc(1, sizeof(MQTTAsync_failureData5));
   copyBuf->token = data->token;
   copyBuf->code = data->code;
   if (data->message)
@@ -34,7 +34,7 @@ void destroyFailureData(void **failureDataPtr)
   {
     return;
   }
-  MQTTAsync_failureData *data = (MQTTAsync_failureData *)(*failureDataPtr);
+  MQTTAsync_failureData5 *data = (MQTTAsync_failureData5 *)(*failureDataPtr);
   free((void *)data->message);
   free(data);
   *failureDataPtr = NULL;

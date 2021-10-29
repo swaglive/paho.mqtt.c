@@ -16,12 +16,12 @@ typedef struct
 pthread_mutex_t msg_q_mutex;
 pthread_cond_t nonempty_msg_q_cv;
 RemoteMessage *last_message;
-MQTTAsync_failureData *conn_failure;
+MQTTAsync_failureData5 *conn_failure;
 ConnectionStatus conn_status = idle;
 
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
-void onConnect(void *context, MQTTAsync_successData *response);
-void onConnectFailure(void *context, MQTTAsync_failureData *response);
+void onConnect(void *context, MQTTAsync_successData5 *response);
+void onConnectFailure(void *context, MQTTAsync_failureData5 *response);
 void onConnectionLost(void *context, char *cause);
 void waitingForMessages(void *context, MessageCallback msgCb);
 void waitingForConnection(MQTTAsync client, ConnectionCallback connCb);
@@ -39,28 +39,29 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   }
   printf("[MQTT] Broker: %s, Client: %s \n", brokerUri, clientId);
   MQTTAsync client;
-  MQTTAsync_connectOptions opts = MQTTAsync_connectOptions_initializer;
+  MQTTAsync_createOptions opts = MQTTAsync_createOptions_initializer5;
 
-  if ((rc = MQTTAsync_create(&client, brokerUri, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTASYNC_SUCCESS)
+  if ((rc = MQTTAsync_createWithOptions(&client, brokerUri, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL, &opts)) != MQTTASYNC_SUCCESS)
   {
-    rc = EXIT_FAILURE;
+    printf("[MQTT] Cannot create client\n");
     goto exit;
   }
   if ((rc = MQTTAsync_setCallbacks(client, client, onConnectionLost, onMessage, NULL)) != MQTTASYNC_SUCCESS)
   {
-    rc = EXIT_FAILURE;
+    printf("[MQTT] Cannot set callbacks\n");
     goto client_destroy_exit;
   }
 
+  MQTTAsync_connectOptions connOpts = MQTTAsync_connectOptions_initializer5;
+  connOpts.keepAliveInterval = 20;
+  connOpts.onSuccess5 = onConnect;
+  connOpts.onFailure5 = onConnectFailure;
+  connOpts.context = client;
   pthread_mutex_init(&msg_q_mutex, NULL);
   pthread_cond_init(&nonempty_msg_q_cv, NULL);
-  opts.keepAliveInterval = 20;
-  opts.cleansession = 1;
-  opts.onSuccess = onConnect;
-  opts.onFailure = onConnectFailure;
-  opts.context = client;
-  if ((rc = MQTTAsync_connect(client, &opts)) != MQTTASYNC_SUCCESS)
+  if ((rc = MQTTAsync_connect(client, &connOpts)) != MQTTASYNC_SUCCESS)
   {
+    printf("[MQTT] Cannot connect, code: %d\n", rc);
     rc = EXIT_FAILURE;
     goto msg_q_destroy_exit;
   }
@@ -124,7 +125,7 @@ void waitingForConnection(MQTTAsync client, ConnectionCallback connCb)
   pthread_mutex_unlock(&msg_q_mutex);
 }
 
-void onConnect(void *context, MQTTAsync_successData *response)
+void onConnect(void *context, MQTTAsync_successData5 *response)
 {
   pthread_mutex_lock(&msg_q_mutex);
   conn_status = connected;
@@ -134,11 +135,11 @@ void onConnect(void *context, MQTTAsync_successData *response)
 
 void onConnectionLost(void *context, char *cause)
 {
-  MQTTAsync_failureData response = {};
+  MQTTAsync_failureData5 response = {};
   response.code = 1;
   response.token = 0;
   response.message = cause;
-  MQTTAsync_failureData *copy = copyFailureData(&response);
+  MQTTAsync_failureData5 *copy = copyFailureData(&response);
   pthread_mutex_lock(&msg_q_mutex);
   conn_failure = copy;
   conn_status = idle;
@@ -146,9 +147,9 @@ void onConnectionLost(void *context, char *cause)
   pthread_mutex_unlock(&msg_q_mutex);
 }
 
-void onConnectFailure(void *context, MQTTAsync_failureData *response)
+void onConnectFailure(void *context, MQTTAsync_failureData5 *response)
 {
-  MQTTAsync_failureData *copy = copyFailureData(response);
+  MQTTAsync_failureData5 *copy = copyFailureData(response);
   pthread_mutex_lock(&msg_q_mutex);
   destroyFailureData((void **)&conn_failure);
   conn_failure = copy;

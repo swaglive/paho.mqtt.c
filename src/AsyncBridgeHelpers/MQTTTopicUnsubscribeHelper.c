@@ -9,10 +9,10 @@ pthread_mutex_t unsub_mutex;
 pthread_cond_t unsub_cv;
 
 int unsubscribing = 0;
-MQTTAsync_failureData *unsub_failure;
+MQTTAsync_failureData5 *unsub_failure;
 
-void onUnsubscribe(void *context, MQTTAsync_successData *response);
-void onUnsubscribeFailure(void *context, MQTTAsync_failureData *response);
+void onUnsubscribe(void *context, MQTTAsync_successData5 *response);
+void onUnsubscribeFailure(void *context, MQTTAsync_failureData5 *response);
 int waitForUnsubscriptionResult(void);
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_unsubscribeMany(void *context, int count, char *const *topics)
@@ -26,8 +26,8 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_unsu
 
   int rc;
 
-  opts.onSuccess = onUnsubscribe;
-  opts.onFailure = onUnsubscribeFailure;
+  opts.onSuccess5 = onUnsubscribe;
+  opts.onFailure5 = onUnsubscribeFailure;
   opts.context = client;
 
   if ((rc = MQTTAsync_unsubscribeMany(client, count, topics, &opts)) != MQTTASYNC_SUCCESS)
@@ -71,7 +71,7 @@ int waitForUnsubscriptionResult(void)
   return rc;
 }
 
-void onUnsubscribe(void *context, MQTTAsync_successData *response)
+void onUnsubscribe(void *context, MQTTAsync_successData5 *response)
 {
   pthread_mutex_lock(&unsub_mutex);
   printf("Unsubscribe succeeded\n");
@@ -80,9 +80,9 @@ void onUnsubscribe(void *context, MQTTAsync_successData *response)
   pthread_mutex_unlock(&unsub_mutex);
 }
 
-void onUnsubscribeFailure(void *context, MQTTAsync_failureData *response)
+void onUnsubscribeFailure(void *context, MQTTAsync_failureData5 *response)
 {
-  MQTTAsync_failureData *copy = copyFailureData(response);
+  MQTTAsync_failureData5 *copy = copyFailureData(response);
   pthread_mutex_lock(&unsub_mutex);
   printf("Subscribe failed, rc %d\n", response->code);
   unsub_failure = copy;
