@@ -9,6 +9,11 @@ libpaho-mqtt3_c_includes := $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path) \
 	external/zlib \
 	$(LOCAL_PATH)/$(build_path) \
 
+openssl_prebuild_dir = ../Prebuilt-OpenSSL-Android/Prebuilt
+armeabi-v7a_openssl_prebuild_name = armv7-shared
+arm64-v8a_openssl_prebuild_name = arm64-shared
+x86_openssl_prebuild_name = x86-shared
+
 MAJOR_VERSION := $(shell cat $(LOCAL_PATH)/../version.major)
 MINOR_VERSION := $(shell cat $(LOCAL_PATH)/../version.minor)
 PATCH_VERSION := $(shell cat $(LOCAL_PATH)/../version.patch)
@@ -71,48 +76,23 @@ SED_COMMAND = sed \
 $(LOCAL_PATH)/$(build_path)/VersionInfo.h: $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)/VersionInfo.h.in
 	$(SED_COMMAND) $< > $@
 
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libssl
+LOCAL_SRC_FILES := $(openssl_prebuild_dir)/$($(TARGET_ARCH_ABI)_openssl_prebuild_name)/lib/libssl.so
+LOCAL_EXPORT_C_INCLUDES := $(openssl_prebuild_dir)/$($(TARGET_ARCH_ABI)_openssl_prebuild_name)/include
+include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-.PHONY: $(LOCAL_PATH)/$(build_path)/VersionInfo.h
-LOCAL_MODULE    := libpaho-mqtt3c
-LOCAL_SHARED_LIBRARIES := libdl
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)
-LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
-LOCAL_SRC_FILES := $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_c)
-include $(BUILD_SHARED_LIBRARY)
-
-# include $(CLEAR_VARS)
-# LOCAL_MODULE    := libpaho-mqtt3cs
-# LOCAL_SHARED_LIBRARIES := libcrypto libssl libdl
-# LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/$(libpaho-mqtt3_lib_path)
-# LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
-# LOCAL_CFLAGS += -DOPENSSL
-# LOCAL_SRC_FILES := $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_cs)
-# include $(BUILD_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
-.PHONY: $(LOCAL_PATH)/$(build_path)/VersionInfo.h
-LOCAL_MODULE    := libpaho-mqtt3a
-LOCAL_SHARED_LIBRARIES := libdl
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/${libpaho-mqtt3_lib_path}
-LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
-LOCAL_SRC_FILES := $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_a)
-include $(BUILD_SHARED_LIBRARY)
- 
-# include $(CLEAR_VARS)
-# LOCAL_MODULE    := libpaho-mqtt3as
-# LOCAL_SHARED_LIBRARIES := libcrypto libssl libdl
-# LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/${libpaho-mqtt3_lib_path}
-# LOCAL_CFLAGS += -DOPENSSL
-# LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
-# LOCAL_SRC_FILES := $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_as)
-# include $(BUILD_SHARED_LIBRARY)
+LOCAL_MODULE    := libcrypto
+LOCAL_SRC_FILES := $(openssl_prebuild_dir)/$($(TARGET_ARCH_ABI)_openssl_prebuild_name)/lib/libcrypto.so
+LOCAL_EXPORT_C_INCLUDES := $(openssl_prebuild_dir)/$($(TARGET_ARCH_ABI)_openssl_prebuild_name)/include
+include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 .PHONY: $(LOCAL_PATH)/$(build_path)/VersionInfo.h
 LOCAL_MODULE    := libpaho-mqtt-helper
-LOCAL_SHARED_LIBRARIES := libdl
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/$(libpaho-mqtt-helper_lib_path)
-LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes)
-LOCAL_SRC_FILES := $(libpaho-mqtt-helper_local_src_files) $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_a)
+LOCAL_SHARED_LIBRARIES := libdl libssl libcrypto
+LOCAL_CFLAGS += -DOPENSSL
+LOCAL_C_INCLUDES:= $(libpaho-mqtt3_c_includes) ../Prebuilt-OpenSSL-Android/Prebuilt/armv7-shared/include
+LOCAL_SRC_FILES := $(libpaho-mqtt-helper_local_src_files) $(libpaho-mqtt3_local_src_c_files_common) $(libpaho-mqtt3_local_src_c_files_as)
 include $(BUILD_SHARED_LIBRARY)

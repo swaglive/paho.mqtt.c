@@ -1,3 +1,6 @@
 [submodule "OpenSSL"]
 	path = OpenSSL
 	url = git@github.com:krzyzanowskim/OpenSSL.git
+[submodule "Prebuilt-OpenSSL-Android"]
+	path = Prebuilt-OpenSSL-Android
+	url = git@github.com:Sharm/Prebuilt-OpenSSL-Android.git
