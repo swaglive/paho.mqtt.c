@@ -25,6 +25,7 @@ void onConnectFailure(void *context, MQTTAsync_failureData5 *response);
 void onConnectionLost(void *context, char *cause);
 void waitingForMessages(void *context, MessageCallback msgCb);
 void waitingForConnection(MQTTAsync client, ConnectionCallback connCb);
+int _isSecure(const char *);
 void _freeLastMessage(void);
 void _freeConnMessage(void);
 void processMessages(void *context, MessageCallback msgCb);
@@ -53,10 +54,17 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   }
 
   MQTTAsync_connectOptions connOpts = MQTTAsync_connectOptions_initializer5;
+  MQTTAsync_SSLOptions sslOpts = MQTTAsync_SSLOptions_initializer;
+
   connOpts.keepAliveInterval = 20;
   connOpts.onSuccess5 = onConnect;
   connOpts.onFailure5 = onConnectFailure;
   connOpts.context = client;
+  if (_isSecure(brokerUri))
+  {
+    sslOpts.verify = 0;
+    connOpts.ssl = &sslOpts;
+  }
   pthread_mutex_init(&msg_q_mutex, NULL);
   pthread_cond_init(&nonempty_msg_q_cv, NULL);
   if ((rc = MQTTAsync_connect(client, &connOpts)) != MQTTASYNC_SUCCESS)
@@ -78,6 +86,15 @@ client_destroy_exit:
   MQTTAsync_destroy(&client);
 exit:
   return rc;
+}
+
+int _isSecure(const char *brokerUri)
+{
+  if (strncmp(brokerUri, "ssl://", 6) == 0 || strncmp(brokerUri, "wss://", 6) == 0)
+  {
+    return 1;
+  }
+  return 0;
 }
 
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message)
