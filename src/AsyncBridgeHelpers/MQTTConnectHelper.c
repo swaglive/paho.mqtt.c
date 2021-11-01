@@ -25,12 +25,17 @@ void onConnectFailure(void *context, MQTTAsync_failureData5 *response);
 void onConnectionLost(void *context, char *cause);
 void waitingForMessages(void *context, MessageCallback msgCb);
 void waitingForConnection(MQTTAsync client, ConnectionCallback connCb);
-int _isSecure(const char *);
-void _freeLastMessage(void);
-void _freeConnMessage(void);
+int isSecure(const char *);
+void freeLastMessage(void);
 void processMessages(void *context, MessageCallback msgCb);
+int handleSslErrorMessage(const char *str, size_t len, void *u);
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
+{
+  return MQTTHelper_connect(brokerUri, clientId, msgCb, connCb, NULL, NULL);
+}
+
+int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
 {
   int rc = 0;
   if (!brokerUri || !clientId)
@@ -60,10 +65,13 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   connOpts.onSuccess5 = onConnect;
   connOpts.onFailure5 = onConnectFailure;
   connOpts.context = client;
-  if (_isSecure(brokerUri))
+  if (isSecure(brokerUri))
   {
-    sslOpts.verify = 0;
+    sslOpts.trustStore = CAfile;
+    sslOpts.CApath = CApath;
+    sslOpts.enableServerCertAuth = 1;
     connOpts.ssl = &sslOpts;
+    sslOpts.ssl_error_cb = handleSslErrorMessage;
   }
   pthread_mutex_init(&msg_q_mutex, NULL);
   pthread_cond_init(&nonempty_msg_q_cv, NULL);
@@ -78,7 +86,7 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   waitingForMessages(client, msgCb);
 
 msg_q_destroy_exit:
-  _freeLastMessage();
+  freeLastMessage();
   destroyFailureData((void **)&conn_failure);
   pthread_mutex_destroy(&msg_q_mutex);
   pthread_cond_destroy(&nonempty_msg_q_cv);
@@ -88,7 +96,7 @@ exit:
   return rc;
 }
 
-int _isSecure(const char *brokerUri)
+int isSecure(const char *brokerUri)
 {
   if (strncmp(brokerUri, "ssl://", 6) == 0 || strncmp(brokerUri, "wss://", 6) == 0)
   {
@@ -108,7 +116,7 @@ int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *m
   msg->message = msgBuf;
   msg->topic = topicBuf;
   pthread_mutex_lock(&msg_q_mutex);
-  _freeLastMessage();
+  freeLastMessage();
   last_message = msg;
   pthread_cond_signal(&nonempty_msg_q_cv);
   pthread_mutex_unlock(&msg_q_mutex);
@@ -199,10 +207,10 @@ void processMessages(void *context, MessageCallback msgCb)
   MQTTHelper_UserProperties props = getUserPropertiesFromMessage(msgPtr);
   (*msgCb)(context, topic, payload, payloadlen, props);
   freeUserProperties(props);
-  _freeLastMessage();
+  freeLastMessage();
 }
 
-void _freeLastMessage()
+void freeLastMessage()
 {
   if (last_message)
   {
@@ -211,4 +219,13 @@ void _freeLastMessage()
     free(last_message);
     last_message = NULL;
   }
+}
+
+int handleSslErrorMessage(const char *str, size_t len, void *u)
+{
+  char *copy = (char *)calloc(len + 1, sizeof(char));
+  copy = (char *)memcpy(copy, str, len);
+  copy[len] = '\0';
+  printf("[MQTT] SSL error: %s", copy);
+  return 1;
 }
