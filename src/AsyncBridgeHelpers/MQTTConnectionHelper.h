@@ -14,7 +14,7 @@ typedef enum
 
 //TODO: add auth
 int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb);
-int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath);
+int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath);
 int MQTTHelper_disconnect(void *context);
 
 #endif

@@ -32,10 +32,10 @@ int handleSslErrorMessage(const char *str, size_t len, void *u);
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
 {
-  return MQTTHelper_connect(brokerUri, clientId, msgCb, connCb, NULL, NULL);
+  return MQTTHelper_connectWithCerts(brokerUri, clientId, msgCb, connCb, NULL, NULL);
 }
 
-int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
+int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
 {
   int rc = 0;
   if (!brokerUri || !clientId)
