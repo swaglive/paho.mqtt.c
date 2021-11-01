@@ -25,7 +25,7 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subs
   {
     printf("[MQTT] subscribe without context\n");
     return -1;
-  }  
+  }
   MQTTAsync client = (MQTTAsync)context;
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   int rc;
@@ -53,7 +53,7 @@ exit:
 
 __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_subscribe(void *context, const char *topic, MQTTQoS qos)
 {
-  return MQTTHelper_subscribeMany(context, (char *const *)&topic, 1, &qos);
+  return MQTTHelper_subscribeMany(context, 1, (char *const *)&topic, &qos);
 }
 
 int waitForSubscriptionResult()

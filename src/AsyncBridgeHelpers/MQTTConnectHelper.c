@@ -35,7 +35,7 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   return MQTTHelper_connectWithCerts(brokerUri, clientId, msgCb, connCb, NULL, NULL);
 }
 
-int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
 {
   int rc = 0;
   if (!brokerUri || !clientId)
