@@ -12,9 +12,8 @@ typedef enum
   connected = 2
 } ConnectionStatus;
 
-//TODO: add auth
-int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb);
-int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath);
+int MQTTHelper_connect(const char *brokerUri, const char *clientId, const char *username, const char *password, MessageCallback msgCb, ConnectionCallback connCb);
+int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, const char *username, const char *password, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath);
 int MQTTHelper_disconnect(void *context);
 
 #endif

@@ -30,12 +30,12 @@ void freeLastMessage(void);
 void processMessages(void *context, MessageCallback msgCb);
 int handleSslErrorMessage(const char *str, size_t len, void *u);
 
-__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connect(const char *brokerUri, const char *clientId, const char *username, const char *password, MessageCallback msgCb, ConnectionCallback connCb)
 {
-  return MQTTHelper_connectWithCerts(brokerUri, clientId, msgCb, connCb, NULL, NULL);
+  return MQTTHelper_connectWithCerts(brokerUri, clientId, username, password, msgCb, connCb, NULL, NULL);
 }
 
-__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
+__attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_connectWithCerts(const char *brokerUri, const char *clientId, const char *username, const char *password, MessageCallback msgCb, ConnectionCallback connCb, const char *CAfile, const char *CApath)
 {
   int rc = 0;
   if (!brokerUri || !clientId)
@@ -61,6 +61,10 @@ __attribute__((visibility("default"))) __attribute__((used)) int MQTTHelper_conn
   MQTTAsync_connectOptions connOpts = MQTTAsync_connectOptions_initializer5;
   MQTTAsync_SSLOptions sslOpts = MQTTAsync_SSLOptions_initializer;
 
+  connOpts.username = username;
+  connOpts.password = password;
+  connOpts.automaticReconnect = 1;
+  connOpts.maxRetryInterval = 300;
   connOpts.keepAliveInterval = 20;
   connOpts.onSuccess5 = onConnect;
   connOpts.onFailure5 = onConnectFailure;
